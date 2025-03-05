@@ -494,3 +494,1443 @@ const styles = StyleSheet.create({
 });
 
 export default SwipeToDismissAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef, useState } from 'react';
+import { Animated, TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+
+const AnimatedCardFlip = () => {
+  const [isFlipped, setIsFlipped] = useState(false);
+  const flipAnim = useRef(new Animated.Value(0)).current;
+
+  const flipCard = () => {
+    Animated.timing(flipAnim, {
+      toValue: isFlipped ? 0 : 180,
+      duration: 500,
+      useNativeDriver: true,
+    }).start(() => setIsFlipped(!isFlipped));
+  };
+
+  const frontInterpolate = flipAnim.interpolate({
+    inputRange: [0, 180],
+    outputRange: ['0deg', '180deg'],
+  });
+
+  const backInterpolate = flipAnim.interpolate({
+    inputRange: [0, 180],
+    outputRange: ['180deg', '360deg'],
+  });
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity onPress={flipCard}>
+        <Animated.View style={[styles.card, { transform: [{ rotateY: frontInterpolate }] }]}>
+          <Text style={styles.text}>Front</Text>
+        </Animated.View>
+        <Animated.View style={[styles.card, styles.cardBack, { transform: [{ rotateY: backInterpolate }] }]}>
+          <Text style={styles.text}>Back</Text>
+        </Animated.View>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  card: {
+    width: 200,
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#76c7c0',
+    backfaceVisibility: 'hidden',
+  },
+  cardBack: {
+    position: 'absolute',
+    top: 0,
+    backgroundColor: '#c076a1',
+  },
+  text: {
+    fontSize: 20,
+    color: 'white',
+  },
+});
+
+export default AnimatedCardFlip;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef } from 'react';
+import { Animated, PanResponder, View, StyleSheet } from 'react-native';
+
+const AnimatedDragAndDrop = () => {
+  const pan = useRef(new Animated.ValueXY()).current;
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], { useNativeDriver: false }),
+    onPanResponderRelease: () => {
+      Animated.spring(pan, {
+        toValue: { x: 0, y: 0 },
+        useNativeDriver: true,
+      }).start();
+    },
+  });
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[styles.box, { transform: [{ translateX: pan.x }, { translateY: pan.y }] }]}
+        {...panResponder.panHandlers}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+    borderRadius: 10,
+  },
+});
+
+export default AnimatedDragAndDrop;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useRef } from 'react';
+import { Animated, View, Text, StyleSheet, Button } from 'react-native';
+
+const AnimatedProgressBar = () => {
+  const progress = useRef(new Animated.Value(0)).current;
+
+  const startAnimation = () => {
+    Animated.timing(progress, {
+      toValue: 1,
+      duration: 2000, // 2 seconds
+      useNativeDriver: false,
+    }).start();
+  };
+
+  const resetAnimation = () => {
+    progress.setValue(0); // Reset progress to 0
+  };
+
+  const widthInterpolate = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+  });
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Animated Progress Bar</Text>
+      <View style={styles.progressContainer}>
+        <Animated.View style={[styles.progressBar, { width: widthInterpolate }]} />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button title="Start Progress" onPress={startAnimation} />
+        <Button title="Reset" onPress={resetAnimation} />
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  progressContainer: {
+    height: 20,
+    width: '100%',
+    backgroundColor: '#e0e0e0',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#76c7c0',
+  },
+  buttonContainer: {
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+});
+
+export default AnimatedProgressBar;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef } from 'react';
+import { Animated, TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+
+const AnimatedAccordion = () => {
+  const animation = useRef(new Animated.Value(0)).current;
+  const [expanded, setExpanded] = React.useState(false);
+
+  const toggleAccordion = () => {
+    Animated.timing(animation, {
+      toValue: expanded ? 0 : 1,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+    setExpanded(!expanded);
+  };
+
+  const heightInterpolate = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 100], // Adjust height as needed
+  });
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity onPress={toggleAccordion} style={styles.header}>
+        <Text style={styles.title}>Tap to {expanded ? 'Collapse' : 'Expand'}</Text>
+      </TouchableOpacity>
+      <Animated.View style={[styles.content, { height: heightInterpolate }]}>
+        <Text>This is the expanded content!</Text>
+      </Animated.View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    margin: 20,
+    overflow: 'hidden',
+  },
+  header: {
+    padding: 10,
+    backgroundColor: '#76c7c0',
+    borderRadius: 5,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  content: {
+    padding: 10,
+    backgroundColor: '#f0f0f0',
+  },
+});
+
+export default AnimatedAccordion;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef } from 'react';
+import { Animated, TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+
+const AnimatedFAB = () => {
+  const animation = useRef(new Animated.Value(0)).current;
+
+  const handlePress = () => {
+    Animated.spring(animation, {
+      toValue: 1,
+      friction: 3,
+      useNativeDriver: true,
+    }).start(() => {
+      Animated.spring(animation, {
+        toValue: 0,
+        friction: 3,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
+  const scaleInterpolate = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.2],
+  });
+
+  return (
+    <View style={styles.container}>
+      <Animated.View style={[styles.fab, { transform: [{ scale: scaleInterpolate }] }]}>
+        <TouchableOpacity onPress={handlePress} style={styles.button}>
+          <Text style={styles.icon}>+</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    margin: 20,
+  },
+  fab: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#76c7c0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  button: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  icon: {
+    fontSize: 24,
+    color: 'white',
+  },
+});
+
+export default AnimatedFAB;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef, useState } from 'react';
+import { Animated, TouchableOpacity, View, StyleSheet } from 'react-native';
+
+const AnimatedToggleSwitch = () => {
+  const [isOn, setIsOn] = useState(false);
+  const animation = useRef(new Animated.Value(0)).current;
+
+  const toggleSwitch = () => {
+    Animated.timing(animation, {
+      toValue: isOn ? 0 : 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+    setIsOn(!isOn);
+  };
+
+  const translateXInterpolate = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 30], // Adjust based on switch width
+  });
+
+  return (
+    <View style={styles.container}>
+      <TouchableOpacity onPress={toggleSwitch} style={styles.switch}>
+        <Animated.View style={[styles.knob, { transform: [{ translateX: translateXInterpolate }] }]} />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  switch: {
+    width: 60,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#e0e0e0',
+    justifyContent: 'center',
+    padding: 5,
+  },
+  knob: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default AnimatedToggleSwitch;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef } from 'react';
+import { Animated, View, StyleSheet, Button } from 'react-native';
+
+const SequenceFadeAnimation = () => {
+  const fadeValue = useRef(new Animated.Value(0)).current;
+
+  const startAnimation = () => {
+    Animated.sequence([
+      Animated.timing(fadeValue, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeValue, {
+        toValue: 0,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  return (
+    <View style={styles.container}>
+      <Animated.View style={[styles.box, { opacity: fadeValue }]} />
+      <Button title="Start Fade Sequence" onPress={startAnimation} />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default SequenceFadeAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef } from 'react';
+import { Animated, View, StyleSheet, Button } from 'react-native';
+
+const ParallelFadeMoveAnimation = () => {
+  const fadeValue = useRef(new Animated.Value(0)).current;
+  const moveValue = useRef(new Animated.Value(0)).current;
+
+  const startAnimation = () => {
+    Animated.parallel([
+      Animated.timing(fadeValue, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(moveValue, {
+        toValue: 100,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      fadeValue.setValue(0); // Reset fade
+      moveValue.setValue(0); // Reset move
+    });
+  };
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.box,
+          {
+            opacity: fadeValue,
+            transform: [{ translateY: moveValue }],
+          },
+        ]}
+      />
+      <Button title="Start Fade & Move" onPress={startAnimation} />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default ParallelFadeMoveAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef } from 'react';
+import { Animated, View, StyleSheet, Button } from 'react-native';
+
+const StaggerAnimation = () => {
+  const fadeValue1 = useRef(new Animated.Value(0)).current;
+  const fadeValue2 = useRef(new Animated.Value(0)).current;
+
+  const startAnimation = () => {
+    Animated.stagger(500, [
+      Animated.timing(fadeValue1, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeValue2, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      fadeValue1.setValue(0); // Reset
+      fadeValue2.setValue(0); // Reset
+    });
+  };
+
+  return (
+    <View style={styles.container}>
+      <Animated.View style={[styles.box, { opacity: fadeValue1 }]} />
+      <Animated.View style={[styles.box, { opacity: fadeValue2 }]} />
+      <Button title="Start Stagger Animation" onPress={startAnimation} />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+    margin: 10,
+  },
+});
+
+export default StaggerAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef } from 'react';
+import { Animated, View, StyleSheet, Button } from 'react-native';
+
+const StaggerScaleAnimation = () => {
+  const scaleValue1 = useRef(new Animated.Value(1)).current;
+  const scaleValue2 = useRef(new Animated.Value(1)).current;
+
+  const startAnimation = () => {
+    Animated.stagger(500, [
+      Animated.timing(scaleValue1, {
+        toValue: 1.5,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleValue2, {
+        toValue: 1.5,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      scaleValue1.setValue(1); // Reset
+      scaleValue2.setValue(1); // Reset
+    });
+  };
+
+  return (
+    <View style={styles.container}>
+      <Animated.View style={[styles.box, { transform: [{ scale: scaleValue1 }] }]} />
+      <Animated.View style={[styles.box, { transform: [{ scale: scaleValue2 }] }]} />
+      <Button title="Start Stagger Scale" onPress={startAnimation} />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+    margin: 10,
+  },
+});
+
+export default StaggerScaleAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useRef } from 'react';
+import { Animated, View, StyleSheet } from 'react-native';
+
+const LoopRotationAnimation = () => {
+  const rotateValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(rotateValue, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, []);
+
+  const rotateInterpolate = rotateValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.box,
+          {
+            transform: [{ rotate: rotateInterpolate }],
+          },
+        ]}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default LoopRotationAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useRef } from 'react';
+import { Animated, View, StyleSheet } from 'react-native';
+
+const LoopScaleAnimation = () => {
+  const scaleValue = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(scaleValue, {
+          toValue: 1.5,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scaleValue, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.box,
+          {
+            transform: [{ scale: scaleValue }],
+          },
+        ]}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default LoopScaleAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef } from 'react';
+import { Animated, View, StyleSheet, Button } from 'react-native';
+
+const SequenceAnimation = () => {
+  const scaleValue = useRef(new Animated.Value(1)).current;
+  const rotateValue = useRef(new Animated.Value(0)).current;
+
+  const startAnimation = () => {
+    Animated.sequence([
+      Animated.timing(scaleValue, {
+        toValue: 1.5,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(rotateValue, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      scaleValue.setValue(1); // Reset scale
+      rotateValue.setValue(0); // Reset rotation
+    });
+  };
+
+  const scaleInterpolate = scaleValue.interpolate({
+    inputRange: [1, 1.5],
+    outputRange: [1, 1.5], // Use numbers here
+  });
+
+  const rotateInterpolate = rotateValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'], // Degrees can be strings
+  });
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.box,
+          {
+            transform: [
+              { scale: scaleInterpolate },
+              { rotate: rotateInterpolate },
+            ],
+          },
+        ]}
+      />
+      <Button title="Start Sequence Animation" onPress={startAnimation} />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default SequenceAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef } from 'react';
+import { Animated, View, StyleSheet, Button } from 'react-native';
+
+const SequenceMoveFadeAnimation = () => {
+  const moveValue = useRef(new Animated.Value(0)).current;
+  const fadeValue = useRef(new Animated.Value(1)).current;
+
+  const startAnimation = () => {
+    Animated.sequence([
+      Animated.timing(moveValue, {
+        toValue: 100,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeValue, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      moveValue.setValue(0); // Reset move
+      fadeValue.setValue(1); // Reset fade
+    });
+  };
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.box,
+          {
+            opacity: fadeValue,
+            transform: [{ translateX: moveValue }],
+          },
+        ]}
+      />
+      <Button title="Start Move & Fade" onPress={startAnimation} />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default SequenceMoveFadeAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useRef } from 'react';
+import { Animated, View, StyleSheet, Button } from 'react-native';
+
+const ParallelAnimation = () => {
+  const scaleValue = useRef(new Animated.Value(1)).current;
+  const rotateValue = useRef(new Animated.Value(0)).current;
+
+  const startAnimation = () => {
+    Animated.parallel([
+      Animated.timing(scaleValue, {
+        toValue: 1.5,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.timing(rotateValue, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      scaleValue.setValue(1); // Reset scale
+      rotateValue.setValue(0); // Reset rotation
+    });
+  };
+
+  const scaleInterpolate = scaleValue.interpolate({
+    inputRange: [1, 1.5],
+    outputRange: [1, 1.5], // Use numbers here
+  });
+
+  const rotateInterpolate = rotateValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'], // Degrees can be strings
+  });
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.box,
+          {
+            transform: [
+              { scale: scaleInterpolate },
+              { rotate: rotateInterpolate },
+            ],
+          },
+        ]}
+      />
+      <Button title="Start Parallel Animation" onPress={startAnimation} />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default ParallelAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useRef } from 'react';
+import { Animated, View, StyleSheet, Dimensions } from 'react-native';
+
+const { width } = Dimensions.get('window');
+
+const WaveAnimation = () => {
+  const waveAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(waveAnim, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, []);
+
+  const waveInterpolate = waveAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.wave,
+          {
+            transform: [
+              { rotate: waveInterpolate },
+            ],
+          },
+        ]}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  wave: {
+    width: width,
+    height: 200,
+    backgroundColor: '#76c7c0',
+    borderRadius: 100,
+  },
+});
+
+export default WaveAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useRef } from 'react';
+import { Animated, View, StyleSheet } from 'react-native';
+
+const PulsatingAnimation = () => {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.5,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.circle,
+          {
+            transform: [{ scale: pulseAnim }],
+          },
+        ]}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  circle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default PulsatingAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useRef } from 'react';
+import { Animated, View, StyleSheet } from 'react-native';
+
+const ThreeDRotationAnimation = () => {
+  const rotateX = useRef(new Animated.Value(0)).current;
+  const rotateY = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.parallel([
+        Animated.timing(rotateX, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(rotateY, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const rotateXInterpolate = rotateX.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  const rotateYInterpolate = rotateY.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.box,
+          {
+            transform: [
+              { rotateX: rotateXInterpolate },
+              { rotateY: rotateYInterpolate },
+            ],
+          },
+        ]}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default ThreeDRotationAnimation;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useRef } from 'react';
+import { Animated, View, StyleSheet } from 'react-native';
+
+const ZigzagAnimation = () => {
+  const moveX = useRef(new Animated.Value(0)).current;
+  const moveY = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animateX = Animated.timing(moveX, {
+      toValue: 100,
+      duration: 500,
+      useNativeDriver: true,
+    });
+
+    const animateY = Animated.timing(moveY, {
+      toValue: 100,
+      duration: 500,
+      useNativeDriver: true,
+    });
+
+    const resetX = Animated.timing(moveX, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: true,
+    });
+
+    const resetY = Animated.timing(moveY, {
+      toValue: 0,
+      duration: 500,
+      useNativeDriver: true,
+    });
+
+    Animated.loop(
+      Animated.sequence([
+        animateX,
+        animateY,
+        resetX,
+        resetY,
+      ])
+    ).start();
+  }, []);
+
+  return (
+    <View style={styles.container}>
+      <Animated.View
+        style={[
+          styles.box,
+          {
+            transform: [
+              { translateX: moveX },
+              { translateY: moveY },
+            ],
+          },
+        ]}
+      />
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  box: {
+    width: 100,
+    height: 100,
+    backgroundColor: '#76c7c0',
+  },
+});
+
+export default ZigzagAnimation;
